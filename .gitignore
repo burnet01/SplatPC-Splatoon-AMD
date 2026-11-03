@@ -2,6 +2,7 @@
 # setup.sh and must never be committed (they contain or derive from your game
 # files).
 /build/
+/dump/
 /Game/
 
 # Auto-fetched third-party headers
@@ -39,6 +40,12 @@ save/
 /recompiler/port/runtime/game_branch_tables.h
 
 # Tools
+.DS_Store
+Thumbs.db
+Desktop.ini
+.env
+.env.*
+!.env.example
 __pycache__/
 *.pyc
 .vs/
@@ -56,6 +63,7 @@ __pycache__/
 /link_cmd.txt
 /user_prompt_full.txt
 /original_cpp_emitter.cpp
+/check_parts.pyx
 /check_parts.py
 
 # scripts/: only the maintained tools are tracked. One-off experiment scripts

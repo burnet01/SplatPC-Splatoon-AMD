@@ -31,6 +31,7 @@
 #include "../gx2/vk/gx2_imgui_overlay.h"
 #include "../gx2/gx2_env_light.h"
 #include "../../runtime/port_settings.h"
+#include "../../hooks/turf_bots.h"
 #include <atomic>
 #include <cstdlib>
 #include <chrono>
@@ -333,6 +334,7 @@ static void VPADRead(CPUState* cpu) {
 
     if (errp) rbrew_write32(MEM, errp, 0u); // VPAD_READ_SUCCESS
     vpad_apply_motion_policy(MEM);
+    turf_bots_tick(cpu);
 
     if (!buf || count == 0 || !rbrew_memory_accessible(MEM, buf, kVpadStatusSize)) {
         RET = 0;

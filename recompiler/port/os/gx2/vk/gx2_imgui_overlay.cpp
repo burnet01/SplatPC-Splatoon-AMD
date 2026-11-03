@@ -16,6 +16,7 @@
 #include "../../runtime/splatoon_diagnostics.h"
 #include "../../nn_nfp/nn_nfp.h"
 #include "../gx2_perf.h"
+#include "../../../hooks/turf_bots.h"
 
 #include <imgui.h>
 #include <imgui_impl_sdl2.h>
@@ -25,6 +26,7 @@
 #include <SDL.h>
 
 #include <algorithm>
+#include <array>
 #include <atomic>
 #include <chrono>
 #include <cstdio>
@@ -712,6 +714,27 @@ void build_settings_window() {
     dirty |= ImGui::Checkbox("Invert gyro up/down", &v.gyro_invert_pitch);
     dirty |= ImGui::SliderInt("Mouse sensitivity", &v.mouse_sensitivity, 25, 400, "%d %%");
     dirty |= ImGui::SliderInt("Volume", &v.volume, 0, 100, "%d %%");
+    ImGui::Separator();
+    ImGui::TextUnformatted("Turf War vs CPU (4 vs 4)");
+    static int s_turf_stage = 0;
+    static const auto s_turf_names = [] {
+        std::array<const char*, std::size(kTurfBotsStages)> names{};
+        for (size_t i = 0; i < names.size(); ++i) names[i] = kTurfBotsStages[i].name;
+        return names;
+    }();
+    ImGui::Combo("Stage", &s_turf_stage, s_turf_names.data(), int(s_turf_names.size()));
+    const bool can_start = turf_bots_can_start();
+    ImGui::BeginDisabled(!can_start);
+    if (ImGui::Button("Start Turf War")) {
+        turf_bots_start(kTurfBotsStages[s_turf_stage].file);
+        set_menu_open(false);
+    }
+    ImGui::EndDisabled();
+    if (!can_start) {
+        ImGui::SameLine();
+        ImGui::TextDisabled(turf_bots_active() ? "(match running)" : "(from the Plaza)");
+    }
+    ImGui::Separator();
     if (ImGui::Button("Keyboard & mouse controls")) s_menu_page = MenuPage::Keyboard;
     if (ImGui::Button("Controller controls")) s_menu_page = MenuPage::Controller;
     if (ImGui::Button("Quit game")) {
@@ -921,7 +944,7 @@ void render_draw_data(ImDrawData* draw_data, VkCommandBuffer cb, VkImage target,
     if (!draw_data || draw_data->CmdListsCount == 0) return;
     VkImageMemoryBarrier barrier{VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER};
     barrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
-    barrier.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+    barrier.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
     barrier.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
     barrier.newLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
     barrier.srcQueueFamilyIndex = barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;

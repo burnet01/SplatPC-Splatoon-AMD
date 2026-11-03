@@ -339,6 +339,7 @@ void Gambit_game_register(CPUState* cpu); // registers all recompiled game funct
 #endif
 #include "os/gx2/gx2_env_light.h"
 void player_anim_register();               // idle look-around and opt-in (RBREW_ANIM_LOG) animation trace
+void turf_bots_register();                 // offline Turf War CPU players (hooks/turf_bots.cpp)
 void branch_tables_install(CPUState* cpu); // branch_tables.cpp
 void broadcast_guard_install();            // broadcast_guard.cpp
 void coreinit_memory_init(uint8_t* mem);
@@ -540,6 +541,7 @@ int main(int argc, char** argv) {
     branch_tables_install(&cpu_reg); // link branch-table case blocks (see hooks/branch_tables.cpp)
     broadcast_guard_install();       // 0285C3D0 broadcast loop guard
     player_anim_register();
+    turf_bots_register();
     gx2env::register_hooks(); // game camera hooks (hooks/gx2_camera_hooks.h)
     erreula_register(&cpu_reg);
 

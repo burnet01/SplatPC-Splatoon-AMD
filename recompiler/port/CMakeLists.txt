@@ -202,6 +202,9 @@ add_library(gambit_runtime STATIC
     hooks/player_anim.cpp
     hooks/branch_tables.cpp
     hooks/broadcast_guard.cpp
+    hooks/turf_bots.cpp
+    hooks/turf_bots_nav.cpp
+    hooks/turf_bots_ai.cpp
     loader/gambit_loader.cpp
     loader/native_console_profile.cpp
     runtime/splatoon_diagnostics.cpp
@@ -453,6 +456,10 @@ endif()
 option(RBREW_BUILD_TESTS "Build Nintendo-free native performance regression tests" OFF)
 if(RBREW_BUILD_TESTS)
     enable_testing()
+    add_executable(gambit_device_tests ../tests/test_vulkan_device.cpp)
+    target_include_directories(gambit_device_tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+    target_link_libraries(gambit_device_tests PRIVATE Vulkan::Headers volk::volk)
+    add_test(NAME vulkan_device_selection COMMAND gambit_device_tests)
     add_executable(gambit_texture_pack_tests ../tests/test_texture_pack.cpp)
     target_link_libraries(gambit_texture_pack_tests PRIVATE gambit_runtime)
     target_include_directories(gambit_texture_pack_tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
@@ -461,6 +468,9 @@ if(RBREW_BUILD_TESTS)
     target_link_libraries(gambit_nfp_tests PRIVATE gambit_runtime)
     target_include_directories(gambit_nfp_tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
     add_test(NAME native_nn_nfp COMMAND gambit_nfp_tests)
+    add_executable(gambit_turf_bots_tests ../tests/test_turf_bots.cpp hooks/turf_bots_nav.cpp hooks/turf_bots_ai.cpp)
+    target_include_directories(gambit_turf_bots_tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/../include)
+    add_test(NAME turf_bots COMMAND gambit_turf_bots_tests)
     # Local developer tests/tools below are optional (not in the public tree).
     if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/../tests/test_frame_pacing.cpp")
         add_executable(gambit_frame_pacing_tests ../tests/test_frame_pacing.cpp)
